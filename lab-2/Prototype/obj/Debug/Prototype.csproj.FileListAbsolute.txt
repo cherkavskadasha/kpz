@@ -1,0 +1,7 @@
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Prototype\bin\Debug\Prototype.exe.config
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Prototype\bin\Debug\Prototype.exe
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Prototype\bin\Debug\Prototype.pdb
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Prototype\obj\Debug\Prototype.csproj.AssemblyReference.cache
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Prototype\obj\Debug\Prototype.csproj.CoreCompileInputs.cache
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Prototype\obj\Debug\Prototype.exe
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Prototype\obj\Debug\Prototype.pdb

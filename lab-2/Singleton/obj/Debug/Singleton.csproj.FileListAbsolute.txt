@@ -1,0 +1,7 @@
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Singleton\obj\Debug\Singleton.csproj.AssemblyReference.cache
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Singleton\obj\Debug\Singleton.csproj.CoreCompileInputs.cache
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Singleton\bin\Debug\Singleton.exe.config
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Singleton\bin\Debug\Singleton.exe
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Singleton\bin\Debug\Singleton.pdb
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Singleton\obj\Debug\Singleton.exe
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Singleton\obj\Debug\Singleton.pdb

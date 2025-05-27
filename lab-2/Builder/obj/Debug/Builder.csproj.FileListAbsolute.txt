@@ -1,0 +1,7 @@
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Builder\bin\Debug\Builder.exe.config
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Builder\bin\Debug\Builder.exe
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Builder\bin\Debug\Builder.pdb
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Builder\obj\Debug\Builder.csproj.AssemblyReference.cache
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Builder\obj\Debug\Builder.csproj.CoreCompileInputs.cache
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Builder\obj\Debug\Builder.exe
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\Builder\obj\Debug\Builder.pdb

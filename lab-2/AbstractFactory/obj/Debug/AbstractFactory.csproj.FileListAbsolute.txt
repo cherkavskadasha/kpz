@@ -1,0 +1,7 @@
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\AbstractFactory\bin\Debug\AbstractFactory.exe.config
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\AbstractFactory\bin\Debug\AbstractFactory.exe
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\AbstractFactory\bin\Debug\AbstractFactory.pdb
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\AbstractFactory\obj\Debug\AbstractFactory.csproj.AssemblyReference.cache
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\AbstractFactory\obj\Debug\AbstractFactory.csproj.CoreCompileInputs.cache
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\AbstractFactory\obj\Debug\AbstractFactory.exe
+D:\2курс\Конструювання програмного забезпечення\kpz\lab-2\AbstractFactory\obj\Debug\AbstractFactory.pdb
