@@ -5,7 +5,7 @@
 We avoid code repetition by encapsulating shared logic in base classes or reusable methods.
 
 - `Animal` is a base class that prevents duplicating `Name`, `Species`, `Age`, and `MakeSound()` signatures.
-- Code: [`Program.cs#L10-L24`](./Program.cs#L10-L24)
+- Code: [`Program.cs#L10-L24`](./lab-1/Program.cs#L10-L24)
 
 ---
 
