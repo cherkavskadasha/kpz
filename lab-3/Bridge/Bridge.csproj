@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D6E2651D-3C6E-4AD1-BBFB-C7D0828BE364}</ProjectGuid>
+    <ProjectGuid>{22621E15-860D-42C8-A978-10A541719027}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>lab_3</RootNamespace>
-    <AssemblyName>lab-3</AssemblyName>
+    <RootNamespace>Bridge</RootNamespace>
+    <AssemblyName>Bridge</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

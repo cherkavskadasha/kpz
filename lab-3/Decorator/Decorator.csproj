@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D6E2651D-3C6E-4AD1-BBFB-C7D0828BE364}</ProjectGuid>
+    <ProjectGuid>{CD6028AB-584A-4FD0-A7B7-8A44472320AD}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>lab_3</RootNamespace>
-    <AssemblyName>lab-3</AssemblyName>
+    <RootNamespace>Decorator</RootNamespace>
+    <AssemblyName>Decorator</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
