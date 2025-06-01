@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Composite
 {
@@ -12,14 +10,14 @@ namespace Composite
     // Типи закриття тегів
     public enum ClosingType { Pair, Single }
 
-    // 2. Базовий клас
+    // 1. Базовий клас LightNode (без змін)
     public abstract class LightNode
     {
         public abstract string OuterHTML { get; }
         public abstract string InnerHTML { get; }
     }
 
-    // 3. Текстовий вузол
+    // 2. Текстовий вузол (без змін)
     public class LightTextNode : LightNode
     {
         public string Text { get; set; }
@@ -33,7 +31,7 @@ namespace Composite
         public override string InnerHTML => Text;
     }
 
-    // 4. Елемент вузол
+    // 3. Елемент вузол — основні зміни тут
     public class LightElementNode : LightNode
     {
         public string TagName { get; set; }
@@ -41,6 +39,9 @@ namespace Composite
         public ClosingType Closing { get; set; }
         public List<string> CssClasses { get; set; } = new List<string>();
         public List<LightNode> Children { get; set; } = new List<LightNode>();
+
+        // ДОДАНО: Словник для зберігання подій (спостерігачів)
+        private Dictionary<string, List<EventHandler>> _eventListeners = new Dictionary<string, List<EventHandler>>();
 
         public LightElementNode(string tagName, DisplayType display, ClosingType closing)
         {
@@ -81,15 +82,36 @@ namespace Composite
                 return $"<{TagName}{CssClassString}>{InnerHTML}</{TagName}>";
             }
         }
+
+        // ДОДАНО: Метод додавання слухача на подію
+        public void AddEventListener(string eventType, EventHandler handler)
+        {
+            if (!_eventListeners.ContainsKey(eventType))
+            {
+                _eventListeners[eventType] = new List<EventHandler>();
+            }
+            _eventListeners[eventType].Add(handler);
+        }
+
+        // ДОДАНО: Метод виклику (тригера) події
+        public void TriggerEvent(string eventType, EventArgs args)
+        {
+            if (_eventListeners.ContainsKey(eventType))
+            {
+                foreach (var handler in _eventListeners[eventType])
+                {
+                    handler(this, args);
+                }
+            }
+        }
     }
 
-    // 7. Демонстрація
+    // 4. Демонстрація
     class Program
     {
         static void Main(string[] args)
         {
             // Створення <ul class="list"><li>Item 1</li><li>Item 2</li></ul>
-
             var ul = new LightElementNode("ul", DisplayType.Block, ClosingType.Pair);
             ul.CssClasses.Add("list");
 
@@ -107,6 +129,24 @@ namespace Composite
 
             Console.WriteLine("\n=== InnerHTML ===");
             Console.WriteLine(ul.InnerHTML);
+
+            // Підписка на події
+            li1.AddEventListener("click", (sender, e) =>
+            {
+                Console.WriteLine("Клікнули на Item 1!");
+            });
+
+            li2.AddEventListener("click", (sender, e) =>
+            {
+                Console.WriteLine("Клікнули на Item 2!");
+            });
+
+            // Симуляція події: викликає обробник
+            li1.TriggerEvent("click", EventArgs.Empty);
+            li2.TriggerEvent("click", EventArgs.Empty);
+
+            Console.ReadKey();
         }
+
     }
 }
