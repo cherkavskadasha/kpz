@@ -4,23 +4,18 @@ using System.Text;
 
 namespace Composite
 {
-    // Типи відображення елементів
     public enum DisplayType { Block, Inline }
-
-    // Типи закриття тегів
     public enum ClosingType { Pair, Single }
 
-    // 2. Базовий клас
     public abstract class LightNode
     {
         public abstract string OuterHTML { get; }
         public abstract string InnerHTML { get; }
     }
 
-    // 3. Базовий текстовий вузол
     public class LightTextNode : LightNode
     {
-        protected string Text { get; set; }
+        public string Text { get; set; }
 
         public LightTextNode(string text)
         {
@@ -31,42 +26,21 @@ namespace Composite
         public override string InnerHTML => Text;
     }
 
-    // 3+. Розширений текстовий вузол з хуком рендерингу
-    public class LoggingTextNode : LightTextNode
-    {
-        public LoggingTextNode(string text) : base(text) { }
-
-        protected virtual void OnTextRendered()
-        {
-            Console.WriteLine($"[HOOK] Rendering text: '{Text}'");
-        }
-
-        public override string OuterHTML
-        {
-            get
-            {
-                OnTextRendered();
-                return base.OuterHTML;
-            }
-        }
-
-        public override string InnerHTML => OuterHTML;
-    }
-
-    // 4. Елемент вузол
     public class LightElementNode : LightNode
     {
         public string TagName { get; set; }
         public DisplayType Display { get; set; }
         public ClosingType Closing { get; set; }
-        public List<string> CssClasses { get; set; } = new List<string>();
-        public List<LightNode> Children { get; set; } = new List<LightNode>();
+        public List<string> CssClasses { get; set; }
+        public List<LightNode> Children { get; set; }
 
         public LightElementNode(string tagName, DisplayType display, ClosingType closing)
         {
             TagName = tagName;
             Display = display;
             Closing = closing;
+            CssClasses = new List<string>();
+            Children = new List<LightNode>();
         }
 
         public void AddChild(LightNode node)
@@ -80,7 +54,7 @@ namespace Composite
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 foreach (var child in Children)
                 {
                     sb.Append(child.OuterHTML);
@@ -97,27 +71,87 @@ namespace Composite
                 {
                     return $"<{TagName}{CssClassString}/>";
                 }
-
                 return $"<{TagName}{CssClassString}>{InnerHTML}</{TagName}>";
+            }
+        }
+
+        // Ітератор для глибинного обходу
+        public DepthFirstIterator GetDepthFirstIterator()
+        {
+            return new DepthFirstIterator(this);
+        }
+
+        // Внутрішній клас ітератора
+        public class DepthFirstIterator
+        {
+            private Stack<IEnumerator<LightNode>> stack;
+            private LightNode current;
+
+            public DepthFirstIterator(LightElementNode root)
+            {
+                stack = new Stack<IEnumerator<LightNode>>();
+                // Починаємо з кореневого елемента — сам вузол (обернемо в список)
+                current = root;
+                stack.Push(new List<LightNode> { root }.GetEnumerator());
+            }
+
+            public bool HasNext()
+            {
+                return current != null;
+            }
+
+            public LightNode Next()
+            {
+                if (!HasNext())
+                    throw new InvalidOperationException("No more elements");
+
+                var result = current;
+
+                // Якщо це LightElementNode — піднімаємось у глибину через дітей
+                if (current is LightElementNode element)
+                {
+                    var childrenEnum = element.Children.GetEnumerator();
+                    if (childrenEnum.MoveNext())
+                    {
+                        stack.Push(childrenEnum);
+                        current = childrenEnum.Current;
+                        return result;
+                    }
+                }
+
+                // Якщо немає дітей або це LightTextNode — шукаємо наступного сусіда
+                while (stack.Count > 0)
+                {
+                    var topEnum = stack.Peek();
+                    if (topEnum.MoveNext())
+                    {
+                        current = topEnum.Current;
+                        return result;
+                    }
+                    else
+                    {
+                        stack.Pop();
+                    }
+                }
+
+                current = null; // Ітерація завершена
+                return result;
             }
         }
     }
 
-    // 7. Демонстрація
     class Program
     {
         static void Main(string[] args)
         {
-            // Створення <ul class="list"><li>Item 1</li><li>Item 2</li></ul>
-
             var ul = new LightElementNode("ul", DisplayType.Block, ClosingType.Pair);
             ul.CssClasses.Add("list");
 
             var li1 = new LightElementNode("li", DisplayType.Block, ClosingType.Pair);
-            li1.AddChild(new LoggingTextNode("Item 1"));
+            li1.AddChild(new LightTextNode("Item 1"));
 
             var li2 = new LightElementNode("li", DisplayType.Block, ClosingType.Pair);
-            li2.AddChild(new LoggingTextNode("Item 2"));
+            li2.AddChild(new LightTextNode("Item 2"));
 
             ul.AddChild(li1);
             ul.AddChild(li2);
@@ -128,7 +162,14 @@ namespace Composite
             Console.WriteLine("\n=== InnerHTML ===");
             Console.WriteLine(ul.InnerHTML);
 
-            Console.WriteLine("\nPress any key to continue . . .");
+            Console.WriteLine("\n=== Depth-First Traversal ===");
+            var iterator = ul.GetDepthFirstIterator();
+            while (iterator.HasNext())
+            {
+                var node = iterator.Next();
+                Console.WriteLine(node.OuterHTML);
+            }
+
             Console.ReadKey();
         }
     }
