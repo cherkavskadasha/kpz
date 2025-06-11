@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Composite
 {
@@ -19,10 +17,10 @@ namespace Composite
         public abstract string InnerHTML { get; }
     }
 
-    // 3. Текстовий вузол
+    // 3. Базовий текстовий вузол
     public class LightTextNode : LightNode
     {
-        public string Text { get; set; }
+        protected string Text { get; set; }
 
         public LightTextNode(string text)
         {
@@ -31,6 +29,28 @@ namespace Composite
 
         public override string OuterHTML => Text;
         public override string InnerHTML => Text;
+    }
+
+    // 3+. Розширений текстовий вузол з хуком рендерингу
+    public class LoggingTextNode : LightTextNode
+    {
+        public LoggingTextNode(string text) : base(text) { }
+
+        protected virtual void OnTextRendered()
+        {
+            Console.WriteLine($"[HOOK] Rendering text: '{Text}'");
+        }
+
+        public override string OuterHTML
+        {
+            get
+            {
+                OnTextRendered();
+                return base.OuterHTML;
+            }
+        }
+
+        public override string InnerHTML => OuterHTML;
     }
 
     // 4. Елемент вузол
@@ -94,10 +114,10 @@ namespace Composite
             ul.CssClasses.Add("list");
 
             var li1 = new LightElementNode("li", DisplayType.Block, ClosingType.Pair);
-            li1.AddChild(new LightTextNode("Item 1"));
+            li1.AddChild(new LoggingTextNode("Item 1"));
 
             var li2 = new LightElementNode("li", DisplayType.Block, ClosingType.Pair);
-            li2.AddChild(new LightTextNode("Item 2"));
+            li2.AddChild(new LoggingTextNode("Item 2"));
 
             ul.AddChild(li1);
             ul.AddChild(li2);
@@ -107,6 +127,9 @@ namespace Composite
 
             Console.WriteLine("\n=== InnerHTML ===");
             Console.WriteLine(ul.InnerHTML);
+
+            Console.WriteLine("\nPress any key to continue . . .");
+            Console.ReadKey();
         }
     }
 }
