@@ -5,20 +5,15 @@ using System.Text;
 
 namespace Composite
 {
-    // Типи відображення елементів
     public enum DisplayType { Block, Inline }
-
-    // Типи закриття тегів
     public enum ClosingType { Pair, Single }
 
-    // Базовий вузол
     public abstract class LightNode
     {
         public abstract string OuterHTML { get; }
         public abstract string InnerHTML { get; }
     }
 
-    // Текстовий вузол
     public class LightTextNode : LightNode
     {
         protected string Text { get; set; }
@@ -32,7 +27,6 @@ namespace Composite
         public override string InnerHTML => Text;
     }
 
-    // Розширений текстовий вузол з хуком рендерингу
     public class LoggingTextNode : LightTextNode
     {
         public LoggingTextNode(string text) : base(text) { }
@@ -54,7 +48,6 @@ namespace Composite
         public override string InnerHTML => OuterHTML;
     }
 
-    // Елемент вузол
     public class LightElementNode : LightNode, IEnumerable<LightNode>
     {
         public string TagName { get; set; }
@@ -98,12 +91,10 @@ namespace Composite
                 {
                     return $"<{TagName}{CssClassString}/>";
                 }
-
                 return $"<{TagName}{CssClassString}>{InnerHTML}</{TagName}>";
             }
         }
 
-        // DFS-ітерація (глибина)
         public IEnumerator<LightNode> GetEnumerator()
         {
             yield return this;
@@ -124,7 +115,6 @@ namespace Composite
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        // BFS-ітерація (ширина)
         public IEnumerable<LightNode> TraverseBreadthFirst()
         {
             var queue = new Queue<LightNode>();
@@ -146,23 +136,85 @@ namespace Composite
         }
     }
 
-    // Демонстрація
+    // ==== Command Pattern ====
+    public interface ICommand
+    {
+        void Execute();
+    }
+
+    public class AddChildCommand : ICommand
+    {
+        private readonly LightElementNode _parent;
+        private readonly LightNode _child;
+
+        public AddChildCommand(LightElementNode parent, LightNode child)
+        {
+            _parent = parent;
+            _child = child;
+        }
+
+        public void Execute()
+        {
+            _parent.AddChild(_child);
+        }
+    }
+
+    public class AddCssClassCommand : ICommand
+    {
+        private readonly LightElementNode _element;
+        private readonly string _cssClass;
+
+        public AddCssClassCommand(LightElementNode element, string cssClass)
+        {
+            _element = element;
+            _cssClass = cssClass;
+        }
+
+        public void Execute()
+        {
+            _element.CssClasses.Add(_cssClass);
+        }
+    }
+
+    public class CommandManager
+    {
+        private readonly Queue<ICommand> _commands = new Queue<ICommand>();
+
+        public void AddCommand(ICommand command)
+        {
+            _commands.Enqueue(command);
+        }
+
+        public void ExecuteAll()
+        {
+            while (_commands.Count > 0)
+            {
+                var command = _commands.Dequeue();
+                command.Execute();
+            }
+        }
+    }
+
+    // ==== Program Entry ====
     class Program
     {
         static void Main(string[] args)
         {
-            // Створення: <ul class="list"><li>Item 1</li><li>Item 2</li></ul>
+            var commandManager = new CommandManager();
+
             var ul = new LightElementNode("ul", DisplayType.Block, ClosingType.Pair);
-            ul.CssClasses.Add("list");
+            commandManager.AddCommand(new AddCssClassCommand(ul, "list"));
 
             var li1 = new LightElementNode("li", DisplayType.Block, ClosingType.Pair);
-            li1.AddChild(new LoggingTextNode("Item 1"));
-
             var li2 = new LightElementNode("li", DisplayType.Block, ClosingType.Pair);
-            li2.AddChild(new LoggingTextNode("Item 2"));
 
-            ul.AddChild(li1);
-            ul.AddChild(li2);
+            commandManager.AddCommand(new AddChildCommand(li1, new LoggingTextNode("Item 1")));
+            commandManager.AddCommand(new AddChildCommand(li2, new LoggingTextNode("Item 2")));
+
+            commandManager.AddCommand(new AddChildCommand(ul, li1));
+            commandManager.AddCommand(new AddChildCommand(ul, li2));
+
+            commandManager.ExecuteAll();
 
             Console.WriteLine("=== OuterHTML ===");
             Console.WriteLine(ul.OuterHTML);
