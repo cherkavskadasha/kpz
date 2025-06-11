@@ -48,6 +48,104 @@ namespace Composite
         public override string InnerHTML => OuterHTML;
     }
 
+    // ==== State Pattern ====
+    public interface IRenderState
+    {
+        string Render(LightElementNode element);
+    }
+
+    public class NormalRenderState : IRenderState
+    {
+        public string Render(LightElementNode element)
+        {
+            if (element.Closing == ClosingType.Single)
+            {
+                return $"<{element.TagName}{element.CssClassString}/>";
+            }
+            return $"<{element.TagName}{element.CssClassString}>{element.InnerHTML}</{element.TagName}>";
+        }
+    }
+
+    public class MinifiedRenderState : IRenderState
+    {
+        public string Render(LightElementNode element)
+        {
+            var innerHtmlMinified = "";
+            foreach (var child in element.Children)
+            {
+                if (child is LightElementNode childElement)
+                {
+                    innerHtmlMinified += Render(childElement);
+                }
+                else
+                {
+                    innerHtmlMinified += child.OuterHTML;
+                }
+            }
+
+            var classStr = element.CssClasses.Count > 0 ? $" class=\"{string.Join(" ", element.CssClasses)}\"" : "";
+
+            if (element.Closing == ClosingType.Single)
+            {
+                return $"<{element.TagName}{classStr}/>";
+            }
+            else
+            {
+                innerHtmlMinified = System.Text.RegularExpressions.Regex.Replace(innerHtmlMinified, @"\s+", " ");
+
+                return $"<{element.TagName}{classStr}>{innerHtmlMinified}</{element.TagName}>";
+            }
+        }
+    }
+
+    public class PrettyRenderState : IRenderState
+    {
+        public string Render(LightElementNode element)
+        {
+            StringBuilder sb = new StringBuilder();
+            PrettyRenderRecursive(element, sb, 0);
+            return sb.ToString();
+        }
+
+        private void PrettyRenderRecursive(LightElementNode element, StringBuilder sb, int indent)
+        {
+            string indentStr = new string(' ', indent * 2);
+            sb.AppendLine($"{indentStr}<{element.TagName}{element.CssClassString}>");
+            foreach (var child in element.Children)
+            {
+                if (child is LightElementNode childElement)
+                {
+                    PrettyRenderRecursive(childElement, sb, indent + 1);
+                }
+                else
+                {
+                    sb.AppendLine($"{new string(' ', (indent + 1) * 2)}{child.OuterHTML}");
+                }
+            }
+            sb.AppendLine($"{indentStr}</{element.TagName}>");
+        }
+    }
+
+    public class RenderContext
+    {
+        private IRenderState _state;
+
+        public RenderContext(IRenderState state)
+        {
+            _state = state;
+        }
+
+        public void SetState(IRenderState state)
+        {
+            _state = state;
+        }
+
+        public string Render(LightElementNode element)
+        {
+            return _state.Render(element);
+        }
+    }
+
     public class LightElementNode : LightNode, IEnumerable<LightNode>
     {
         public string TagName { get; set; }
@@ -68,7 +166,7 @@ namespace Composite
             Children.Add(node);
         }
 
-        private string CssClassString => CssClasses.Count > 0 ? $" class=\"{string.Join(" ", CssClasses)}\"" : "";
+        public string CssClassString => CssClasses.Count > 0 ? $" class=\"{string.Join(" ", CssClasses)}\"" : "";
 
         public override string InnerHTML
         {
@@ -87,11 +185,8 @@ namespace Composite
         {
             get
             {
-                if (Closing == ClosingType.Single)
-                {
-                    return $"<{TagName}{CssClassString}/>";
-                }
-                return $"<{TagName}{CssClassString}>{InnerHTML}</{TagName}>";
+                var context = new RenderContext(new NormalRenderState());
+                return context.Render(this);
             }
         }
 
@@ -216,11 +311,17 @@ namespace Composite
 
             commandManager.ExecuteAll();
 
-            Console.WriteLine("=== OuterHTML ===");
-            Console.WriteLine(ul.OuterHTML);
+            var renderContext = new RenderContext(new PrettyRenderState());
+            Console.WriteLine("=== Pretty Render ===");
+            Console.WriteLine(renderContext.Render(ul));
 
-            Console.WriteLine("\n=== InnerHTML ===");
-            Console.WriteLine(ul.InnerHTML);
+            renderContext.SetState(new MinifiedRenderState());
+            Console.WriteLine("\n=== Minified Render ===");
+            Console.WriteLine(renderContext.Render(ul));
+
+            renderContext.SetState(new NormalRenderState());
+            Console.WriteLine("\n=== Normal Render ===");
+            Console.WriteLine(renderContext.Render(ul));
 
             Console.WriteLine("\n=== DFS Traversal ===");
             foreach (var node in ul)
