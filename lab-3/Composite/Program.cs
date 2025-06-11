@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,14 +11,14 @@ namespace Composite
     // Типи закриття тегів
     public enum ClosingType { Pair, Single }
 
-    // 2. Базовий клас
+    // Базовий вузол
     public abstract class LightNode
     {
         public abstract string OuterHTML { get; }
         public abstract string InnerHTML { get; }
     }
 
-    // 3. Базовий текстовий вузол
+    // Текстовий вузол
     public class LightTextNode : LightNode
     {
         protected string Text { get; set; }
@@ -31,7 +32,7 @@ namespace Composite
         public override string InnerHTML => Text;
     }
 
-    // 3+. Розширений текстовий вузол з хуком рендерингу
+    // Розширений текстовий вузол з хуком рендерингу
     public class LoggingTextNode : LightTextNode
     {
         public LoggingTextNode(string text) : base(text) { }
@@ -53,8 +54,8 @@ namespace Composite
         public override string InnerHTML => OuterHTML;
     }
 
-    // 4. Елемент вузол
-    public class LightElementNode : LightNode
+    // Елемент вузол
+    public class LightElementNode : LightNode, IEnumerable<LightNode>
     {
         public string TagName { get; set; }
         public DisplayType Display { get; set; }
@@ -101,15 +102,56 @@ namespace Composite
                 return $"<{TagName}{CssClassString}>{InnerHTML}</{TagName}>";
             }
         }
+
+        // DFS-ітерація (глибина)
+        public IEnumerator<LightNode> GetEnumerator()
+        {
+            yield return this;
+
+            foreach (var child in Children)
+            {
+                yield return child;
+
+                if (child is LightElementNode elementChild)
+                {
+                    foreach (var descendant in elementChild)
+                    {
+                        yield return descendant;
+                    }
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        // BFS-ітерація (ширина)
+        public IEnumerable<LightNode> TraverseBreadthFirst()
+        {
+            var queue = new Queue<LightNode>();
+            queue.Enqueue(this);
+
+            while (queue.Count > 0)
+            {
+                var node = queue.Dequeue();
+                yield return node;
+
+                if (node is LightElementNode element)
+                {
+                    foreach (var child in element.Children)
+                    {
+                        queue.Enqueue(child);
+                    }
+                }
+            }
+        }
     }
 
-    // 7. Демонстрація
+    // Демонстрація
     class Program
     {
         static void Main(string[] args)
         {
-            // Створення <ul class="list"><li>Item 1</li><li>Item 2</li></ul>
-
+            // Створення: <ul class="list"><li>Item 1</li><li>Item 2</li></ul>
             var ul = new LightElementNode("ul", DisplayType.Block, ClosingType.Pair);
             ul.CssClasses.Add("list");
 
@@ -128,7 +170,19 @@ namespace Composite
             Console.WriteLine("\n=== InnerHTML ===");
             Console.WriteLine(ul.InnerHTML);
 
-            Console.WriteLine("\nPress any key to continue . . .");
+            Console.WriteLine("\n=== DFS Traversal ===");
+            foreach (var node in ul)
+            {
+                Console.WriteLine($"Node: {node.GetType().Name}");
+            }
+
+            Console.WriteLine("\n=== BFS Traversal ===");
+            foreach (var node in ul.TraverseBreadthFirst())
+            {
+                Console.WriteLine($"Node: {node.GetType().Name}");
+            }
+
+            Console.WriteLine("\nPress any key to exit...");
             Console.ReadKey();
         }
     }
