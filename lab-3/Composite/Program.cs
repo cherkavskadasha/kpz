@@ -12,6 +12,9 @@ namespace Composite
     {
         public abstract string OuterHTML { get; }
         public abstract string InnerHTML { get; }
+
+        // Додамо прийняття Visitor
+        public abstract void Accept(IVisitor visitor);
     }
 
     public class LightTextNode : LightNode
@@ -25,6 +28,11 @@ namespace Composite
 
         public override string OuterHTML => Text;
         public override string InnerHTML => Text;
+
+        public override void Accept(IVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
     }
 
     public class LoggingTextNode : LightTextNode
@@ -46,6 +54,11 @@ namespace Composite
         }
 
         public override string InnerHTML => OuterHTML;
+
+        public override void Accept(IVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
     }
 
     // ==== State Pattern ====
@@ -229,6 +242,60 @@ namespace Composite
                 }
             }
         }
+
+        public override void Accept(IVisitor visitor)
+        {
+            visitor.Visit(this);
+            foreach (var child in Children)
+            {
+                child.Accept(visitor);
+            }
+        }
+    }
+
+    // ==== Visitor Pattern ====
+    public interface IVisitor
+    {
+        void Visit(LightElementNode element);
+        void Visit(LightTextNode textNode);
+        void Visit(LoggingTextNode loggingTextNode);
+    }
+
+    public class NodeStatisticsVisitor : IVisitor
+    {
+        public int ElementNodeCount { get; private set; } = 0;
+        public int TextNodeCount { get; private set; } = 0;
+        public int LoggingTextNodeCount { get; private set; } = 0;
+
+        private StringBuilder _allText = new StringBuilder();
+
+        public void Visit(LightElementNode element)
+        {
+            ElementNodeCount++;
+            // Продовжуємо обробку дітей у Accept — тут можна додатково, але краще в Accept
+        }
+
+        public void Visit(LightTextNode textNode)
+        {
+            TextNodeCount++;
+            _allText.Append(textNode.OuterHTML);
+        }
+
+        public void Visit(LoggingTextNode loggingTextNode)
+        {
+            LoggingTextNodeCount++;
+            _allText.Append(loggingTextNode.OuterHTML);
+        }
+
+        public void PrintStatistics()
+        {
+            Console.WriteLine("\n=== Node Statistics ===");
+            Console.WriteLine($"Element Nodes: {ElementNodeCount}");
+            Console.WriteLine($"Text Nodes: {TextNodeCount}");
+            Console.WriteLine($"Logging Text Nodes: {LoggingTextNodeCount}");
+            Console.WriteLine("Concatenated Text:");
+            Console.WriteLine(_allText.ToString());
+        }
     }
 
     // ==== Command Pattern ====
@@ -334,6 +401,12 @@ namespace Composite
             {
                 Console.WriteLine($"Node: {node.GetType().Name}");
             }
+
+            // Використання Visitor
+            Console.WriteLine("\n=== Visitor Pattern (NodeStatisticsVisitor) ===");
+            var statsVisitor = new NodeStatisticsVisitor();
+            ul.Accept(statsVisitor);
+            statsVisitor.PrintStatistics();
 
             Console.WriteLine("\nPress any key to exit...");
             Console.ReadKey();
